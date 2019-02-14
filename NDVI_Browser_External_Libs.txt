@@ -1,0 +1,5 @@
+https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.16.0/moment.min.js
+https://cdnjs.cloudflare.com/ajax/libs/promiz/1.0.6/promiz.min.js
+https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.2/lodash.min.js
+https://cdnjs.cloudflare.com/ajax/libs/jsts/1.3.0/jsts.min.js
+https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.3/axios.min.js

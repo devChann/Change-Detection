@@ -1,29 +1,37 @@
-/***************************
+(function() {
+gsp.ready("v1.0", function(gsp) {
+    window.gsp = gsp;
+    window.$GP = gsp;
+
+    window._define = window.define;
+    window.define = null;
+
+    /***************************
  * Application Configuration
  ***************************
  */
 // Name of the folder that will contains application data
 const APP_DATA_FOLDER_NAME = "NDVI_Browser_App_Data";
 // Catalog name of the model to execute
-const GEOPROCESSING_MODEL_NAME = "NDVI-Browser-Model";
+const GEOPROCESSING_MODEL_NAME = "NDVI";
 // Year of the weeks
 const YEAR = 2016;
 // List of the places' names
-const PLACES = ["Las Vegas", "Lodz", "Norcross"];
+const PLACES = ["Mt Kenya", "Abadares", "Karura Forest"];
 // View BBOX for each defined place. Should be in the CRS EPSG:3857.
 // This defines portion of the map user will see after switching to the particular place.
 const PLACES_MAP_VIEW = [
-    [-12921068.135382762, 4249593.0245426595, -12637028.138275048, 4404607.317904998],
-    [2103470.581379765, 6715833.74216387, 2245490.579933623, 6793340.888845039],
-    [-9503262.852639392, 3943844.911401955, -9219222.855531678, 4098859.20476429]
+    [4129953, -47868, 4190066, 8906],
+    [4058708, -120233, 4108803, 0],
+    [4095444, -140274, 4102124, -135820]
 ];
 // Search BBOX for each defined place. Should be in the CRS EPSG:4326.
 // This defines area that needs to be included in the analysed datasets.
 // Area should be smaller then single dataset.
 const PLACES_SEARCH_AOI = [
-    [36.02022525154813, -114.993896484375, 36.23984280222428, -114.66156005859376],
-    [51.69724635547481, 19.37713623046875, 51.83068574881732, 19.553604125976562],
-    [33.84874817060767, -84.35440063476562, 34.092473191457664, -84.0509033203125]
+    [37.1, -0.43, 37.64, 0.08],
+    [36.46, -1.08, 36.91, 0],
+    [36.79,-1.26, 36.85, -1.22]
 ];
 
 
@@ -702,7 +710,7 @@ function renderWeekRow(areaInx, weekInx) {
 
     var label = document.createElement("div");
     label.className = "imagery-label";
-    label.innerHTML = "Week #" + (weekInx + 1) + " (" + Weeks[weekInx].start + " - " + Weeks[weekInx].end + ")";
+    label.innerHTML = Weeks[weekInx].start + " - " + Weeks[weekInx].end ;
     node.appendChild(label);
 
     var loading_img = document.createElement("img");
@@ -939,7 +947,7 @@ function startApplicationCore() {
             "owner": "me",
             "template": {
                 class: "com.erdas.rsp.babel.model.CatalogItem",
-                name: "ROOT"
+                name: "FCCD"
             }
         }
     };
@@ -1003,7 +1011,7 @@ function startApplicationCore() {
                     GeoprocessingModelId = modelId;
                 })
                 .catch(function() {
-                    throw new Error("Unable to find NDVI model.");
+                    throw new Error("Unable to find Change detection model.");
                 });
         })
         .then(function() {
@@ -1033,20 +1041,156 @@ var GeoprocessingModelId = null;
  * User Interface preparation.
  ***************************
  */
+ 
+ function renderUserForm(e){
+    var userform = document.createElement("form");
+    userform.setAttribute("action","");
+    userform.setAttribute("method","post");
+    userform.className = "userform";
+    var heading = document.createElement('h3');
+    heading.innerHTML = "Set Parameters";
+    heading.className="h3";
+    userform.appendChild(heading);
+    
+    var line = document.createElement('hr');
+    line.className ="hr";
+    userform.appendChild(line);
+    var beforeImageLable = document.createElement('label')
+    beforeImageLable.innerHTML = "Before Image";
+    userform.appendChild(beforeImageLable);
+    
+    var beforeImageInput = document.createElement('input');
+    beforeImageInput.setAttribute("type","text");
+    beforeImageInput.setAttribute("name","dbeforeImageInput");
+    userform.appendChild(beforeImageInput);
+    
+    var browseBeforeImage = document.createElement('button');
+    browseBeforeImage.setAttribute("type","submit");
+    browseBeforeImage.setAttribute("name","dname");
+    browseBeforeImage.setAttribute("value","Submit");
+    browseBeforeImage.innerHTML = "Browse";
+    browseBeforeImage.className = "button";
+    userform.appendChild(browseBeforeImage);
+    
+    var lineBreak2 = document.createElement('br');
+    userform.appendChild(lineBreak2);
+    
+    var afterImageLable = document.createElement('label')
+    afterImageLable.innerHTML = "After Image";
+    userform.appendChild(afterImageLable);
+    
+    var afterImageInput = document.createElement('input');
+    afterImageInput.setAttribute("type","text");
+    afterImageInput.setAttribute("name","dbeforeImageInput");
+    userform.appendChild(afterImageInput);
+    
+    var browseAfterImage = document.createElement('button');
+    browseAfterImage.setAttribute("type","submit");
+    browseAfterImage.setAttribute("name","dname");
+    browseAfterImage.setAttribute("value","Submit");
+    browseAfterImage.innerHTML = "Browse";
+    browseAfterImage.className = "button";
+    userform.appendChild(browseAfterImage);
+    
+    
+    var lineBreak2 = document.createElement('br');
+    userform.appendChild(lineBreak2);
+    
+    var boundary= document.createElement('label')
+    boundary.innerHTML = "Boundary(SHP)";
+    userform.appendChild(boundary);
+    
+    var boundaryInput = document.createElement('input');
+    boundaryInput.setAttribute("type","text");
+    boundaryInput.setAttribute("name","dname");
+
+    userform.appendChild(boundaryInput);
+    
+    var browseBoundaryInput = document.createElement('button');
+    browseBoundaryInput.setAttribute("type","submit");
+    browseBoundaryInput.setAttribute("name","dname");
+    browseBoundaryInput.setAttribute("value","Submit");
+    browseBoundaryInput.innerHTML = "Browse"
+    browseBoundaryInput.className = "button"
+    userform.appendChild(browseBoundaryInput);
+    
+    var lineBreak2 = document.createElement('br');
+    userform.appendChild(lineBreak2);
+    
+    // create the drop down list
+    var array= ['landsat 5','landsat 6','landsat 7','landsat 8','sentinel'];
+    var selectorList = document.createElement('select');
+    
+    selectorList.setAttribute("id","mySelect");
+    selectorList.innerHTML = "Select Satelite"
+    selectorList.className = "selectList"
+    userform.appendChild(selectorList);
+    
+    for(var i=0;i<array.length; i++){
+        var option = document.createElement("option");
+        option.setAttribute("value",array[i]);
+        option.text = array[i];
+        selectorList.appendChild(option)
+    }
+    var line = document.createElement('hr');
+    userform.appendChild(line);
+    
+    var Excecute = document.createElement('button');
+    Excecute.setAttribute("type","submit");
+    Excecute.setAttribute("name","dname");
+    Excecute.setAttribute("value","Submit");
+    Excecute.innerHTML = "execute";
+    Excecute.className = "button";
+    userform.appendChild(Excecute);
+    
+    var download = document.createElement('button');
+    download.setAttribute("type","submit");
+    download.setAttribute("name","dname");
+    download.setAttribute("value","Submit");
+    download.innerHTML = "Download";
+    download.className = "button";
+    userform.appendChild(download);
+    document.getElementById("appNav").appendChild(userform);
+    
+    console.log("form rendered");
+    }
+    
 {
     removeElement(document.getElementById("livesearch"));
     removeElement(document.getElementsByClassName("mapc")[0].parentNode);
 
     var appNav = document.createElement("div");
     appNav.className = "appNav";
+    appNav.id = "appNav"
     document.body.appendChild(appNav);
-
+    
     var logoUrlBase = "https://" + window.top.location.host + "/" + window.top.location.pathname;
     var appTitle = document.createElement("div");
     appTitle.className = "appTitle";
-    appTitle.innerHTML = '<img src="' + logoUrlBase + '/assets/images/logos/hex-logo.png">Weekly NDVI Browser';
+    appTitle.innerHTML = 'Forest Cover Change';
     appNav.appendChild(appTitle);
+    
+    var localContent = document.createElement('button');
+    localContent.setAttribute("type","submit");
+    localContent.setAttribute("name","dname");
+    localContent.setAttribute("value","Submit");
+    localContent.innerHTML = "Browse Content";
+    localContent.className = "button";
+    localContent.id = "localContentId"
+    localContent.addEventListener("click", renderUserForm, false);
+    appTitle.appendChild(localContent);
+    
+    var getContent = document.createElement('button');
+    getContent.setAttribute("type","submit");
+    getContent.setAttribute("name","dname");
+    getContent.setAttribute("value","Submit");
+    getContent.innerHTML = "Get Content";
+    getContent.addEventListener("click",getDatasetInfoForWeek,false)
+    getContent.className = "button";
+    
+    appTitle.appendChild(getContent);
 
+    
     var placeSelector = document.createElement("div");
     placeSelector.className = "place-selector";
     appNav.appendChild(placeSelector);
@@ -1058,9 +1202,10 @@ var GeoprocessingModelId = null;
         placeNode.addEventListener("click", changeActiveArea.bind(null, i));
         placeSelector.appendChild(placeNode);
     }
-
+    
+    
     gsp.ui.sidebar.add({
-        title: "Satellite imageries (Year " + YEAR + ")",
+        title: "Satellite Imageries",
         id: "imageries-panel",
         sticky: true
     }, function(ret) {
@@ -1121,7 +1266,26 @@ var GeoprocessingModelId = null;
         });
         ccFieldset.appendChild(ccRange);
         CurrentMaxCC = initValue;
-
+        
+        var startDateLabel= document.createElement('label')
+        startDateLabel.innerHTML = "Start Date";
+        nav.appendChild(startDateLabel);
+        
+        var inputStartdate = document.createElement("input");
+        inputStartdate.className = "input";
+        inputStartdate.setAttribute("type", "date");
+        nav.appendChild(inputStartdate);
+        
+        var endDateLabel= document.createElement('label')
+        endDateLabel.innerHTML = "End Date";
+        nav.appendChild(endDateLabel);
+        
+        var inputEndtdate = document.createElement("input");
+        inputEndtdate.className = "input";
+        inputEndtdate.setAttribute("type", "date");
+        inputEndtdate.placeholder = "End  Date";
+        nav.appendChild(inputEndtdate);
+       
         var preparingNode = document.createElement("div");
         preparingNode.className = "preparing";
         preparingNode.innerHTML = 'Preparing application <span class="percent">0</span>%';
@@ -1132,3 +1296,9 @@ var GeoprocessingModelId = null;
         startApplicationCore();
     });
 }
+
+
+    window.define = window._define;
+    window._define = null;
+    });
+}).call(this);

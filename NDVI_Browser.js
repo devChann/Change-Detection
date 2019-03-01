@@ -8,8 +8,9 @@ const APP_DATA_FOLDER_NAME = "NDVI_Browser_App_Data";
 const GEOPROCESSING_MODEL_NAME = "NDVI";
 // Year of the weeks
 // default dates 
-startDate = '2013-02-01'; 
-endDate = '2019-02-02';
+startDate = "2018";
+
+endDate = '2019-01-29';
 
 
 // List of the places' names
@@ -285,6 +286,9 @@ function checkWeekAvailability(areaId, weekId) {
             if (parseFloat(dsInfo.properties.cloudCover) > CurrentMaxCC) {
                 node.classList.add("filter-out");
             }
+            if(acqDate < CurrentMaxDate){
+                node.classList.add("filter-out");
+            }
 
             return dsInfo.id;
         });
@@ -320,7 +324,7 @@ function generateDetailedStatus(processingInfo) {
  * Generates week signature name for the folder/order.
  */
 function generateName(areaInx, weekId) {
-    return PLACES[areaInx] + "_" + YEAR + "_Week_" + (weekId + 1);
+    return PLACES[areaInx] + "_" + startDate + "_Week_" + (weekId + 1);
 }
 
 /**
@@ -355,7 +359,7 @@ function getDatasetInfoForWeek(areaId, weekId) {
                     return dataset.properties.cloudCover;
                 })
                 .value();
-
+            
             return all.length > 0 ? all[0] : null;
         });
 }
@@ -480,41 +484,18 @@ function getLandsatDatasetInfo(datasetId) {
  }
 
 
-function getWeeksInYear(startDate,endDate) {
-    
+function getWeeksInYear(startDate) {
     var sdateObj = new Date(startDate);
     var smomentObj = moment(sdateObj);
-    var startDateString = smomentObj.format('YYYY-MM-DD');
+    var startDateString = smomentObj.format('YYYY');
     
-    var edateObj = new Date(endDate);
-    var emomentObj = moment(edateObj);
-    var endDateString = emomentObj.format('YYYY-MM-DD');
-    
-    
-    var yearStart= moment(startDateString,'YYYY-MM-DD').startOf('week');
-    
-    //var yearStart = moment(momentString).startOf('week');
-    
-    console.log("start:" + yearStart);
-    
-    var yearEnd = moment(endDateString,'YYYY-MM-DD').startOf('week');
-    
-    console.log("end" + yearEnd);
-    
-    //var now = moment().utc().endOf('day');
-    
-    var maxDate =yearEnd; //now < yearEnd ? now : yearEnd;
-    
-    //var currentDayIndex = maxDate.diff(yearStart, 'days') + 1;
-    
-    var weekStart = yearStart;
-    
-    var currentDayIndex = yearEnd.diff(yearStart,'week');
-    
-    console.log("Number of days" + currentDayIndex);
-    
+    var yearStart = moment().year(startDateString).month(0).date(1).utc().startOf('day');
+    var yearEnd = moment().year(startDateString).utc().endOf('year');
+    var now = moment().utc().endOf('day');
+    var maxDate = now < yearEnd ? now : yearEnd;
+    var currentDayIndex = maxDate.diff(yearStart, 'days') + 1;
+
     var weeks = Math.ceil(currentDayIndex / 7);
-    console.log("number of weeks " + weeks)
     var weekRange = [];
     var weekStart = yearStart;
     var i = 0;
@@ -532,7 +513,6 @@ function getWeeksInYear(startDate,endDate) {
         weekStart = weekStart.isoWeekday(8);
         i++;
     }
-    console.log("week range: " + weekRange);
     return weekRange;
 }
 
@@ -727,12 +707,31 @@ function prepareProcessedData(area, weekId, datasetId, folderInfo) {
  * Callback function (onInput event).
  * Executed when user changes change max CloudCover value & date .
  */
-function recalculateCCFilter(maxValue,startDate) {
+function recalculateCCFilter(maxValue) {
     CurrentMaxCC = maxValue;
     [].forEach.call(document.querySelectorAll(".imagery-entry"), function(el) {
         var ccValue = parseFloat(el.dataset.cc);
+        console.log("ccvalue: " + ccValue);
+        console.log("maxValue: " + maxValue);
         el.classList.toggle("filter-out", ccValue > maxValue);
     });
+}
+
+function recalculateAqDate(maxDate) {
+    CurrentMaxDate = maxDate;
+    var imagesRows = document.querySelectorAll(".imagery-entry");
+
+    // document.getElementById("startDateId").addEventListener("change", function(e) {
+    //     var newDate = e.target.value;
+    //     //var dateEntered = new Date(input);
+    //     //console.log(input); //e.g. 2015-11-13
+    //      e.classList.toggle("filter-out", newDate < maxDate);
+    //     console.log(newDate); //e.g. Fri Nov 13 2015 00:00:00 GMT+0000 (GMT Standard Time)
+    // });
+    for (var i = 0; i < imagesRows.length; i++) {
+
+        imagesRows[i].classList.toggle("filter-out", startDate < maxDate);
+    }
 }
 
 /*
@@ -1074,13 +1073,14 @@ function startApplicationCore() {
  * Application global variables.
  ***************************
  */
-const Weeks = getWeeksInYear(startDate,endDate);
+const Weeks = getWeeksInYear(startDate);
 //console.log(Weeks);
 
 var AppFolderId = null;
 var ActiveArea = null;
 var CurrentMaxCC = null;
 var GeoprocessingModelId = null;
+var CurrentMaxDate = null;
 
 /***************************
  * User Interface preparation.
@@ -1321,6 +1321,7 @@ var GeoprocessingModelId = null;
             event.target.dataset.value = event.target.value;
 
             recalculateCCFilter(parseFloat(event.target.value));
+            
         });
         ccFieldset.appendChild(ccRange);
         CurrentMaxCC = initValue;
@@ -1332,11 +1333,15 @@ var GeoprocessingModelId = null;
         var inputStartdate = document.createElement("input");
         inputStartdate.className = "input";
         inputStartdate.setAttribute("id","startDateId")
-        inputStartdate.setAttribute("type", "date");
-        inputStartdate.setAttribute("data-date-format","YYYY-MM-DD")
-        inputStartdate.setAttribute("value","2013-02-05");
-        inputStartdate.dataset.value = "2013-02-05";
-        inputStartdate.addEventListener("click", getDates, false);
+        inputStartdate.setAttribute("type", "Year");
+        inputStartdate.setAttribute("value","2017");
+        inputStartdate.dataset.value = "2017";
+        inputStartdate.addEventListener("input", function(event) {
+            event.target.dataset.value = event.target.value;
+
+            recalculateAqDate(event.target.value);
+            
+        });
         nav.appendChild(inputStartdate);
         
         

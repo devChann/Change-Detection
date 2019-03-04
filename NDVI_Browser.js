@@ -8,7 +8,7 @@ const APP_DATA_FOLDER_NAME = "NDVI_Browser_App_Data";
 const GEOPROCESSING_MODEL_NAME = "NDVI";
 // Year of the weeks
 // default dates 
-startDate = "2018";
+startDate = "2017";
 
 endDate = '2019-01-29';
 

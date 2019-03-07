@@ -1,10 +1,25 @@
 @import url('https://fonts.googleapis.com/css?family=Numans');
-@import "http://fonts.googleapis.com/css?family=Ubuntu";
+@import url("https://fonts.googleapis.com/css?family=Ubuntu");
+@import url('//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.7.14/css/bootstrap-datetimepicker.min.css');
+@import url('//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css');
+@import url('//cdn.leafletjs.com/leaflet-0.7.3/leaflet.css');
+@import url('//cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css');
 
+body {
+        margin: 0;
+}
+#map {
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+}
 .appNav {
     position: absolute;
     top: 10px;
     left: 10px;
+}
+.appControls{
+    display:inline-block;
 }
 .appNav .appTitle {
     font-size: 17px;
@@ -15,7 +30,6 @@
     font-weight: bold;
     cursor: default;
     user-select: none;
-    pointer-events: none;
     box-shadow: 0px 1px 1px #797979;
     line-height: 35px;
     background-color: rgba(0,0,0,0.5) !important;
@@ -223,6 +237,7 @@
     text-align: center;
     margin: 10px 0;
     position: relative;
+    
 }
 
 .nav button {
@@ -239,6 +254,7 @@
 .nav .active {
     background-color: #77a237;
 }
+
 
 #imageries-body[data-filter="available"] .imagery-entry.no-data,
 #imageries-body[data-filter="analyzed"] .imagery-entry:not(.ready){
@@ -375,35 +391,80 @@
 }
 .userform {
     margin:0;
-    width: 200px;
-    padding-left:5px;
+    width: 229px;
+    padding-left:3px;
     padding-right:5px;
     border-radius: 20px;
     background-color: rgba(0,0,0,0.5) !important;
     padding-bottom:5px;
+    align-content: space-around;
+}
+[type="date"] {
+  background:#fff url(https://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/calendar_2.png)  97% 50% no-repeat ;
+}
+[type="date"]::-webkit-inner-spin-button {
+  display: none;
+}
+[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+}
+.input {
+  border: 1px solid #c4c4c4;
+  border-radius: 5px;
+  background-color: #fff;
+  padding: 3px 5px;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
+  width: 190px;
+  margin:5px;
 }
 
 .h3{
     justify-content: center;
     display:flex;
     padding-top:2px;
-    color:white;
-    
-   
+    color: #0099CC;
+    font-weight: bold;
+    font-size: 17px;
+    text-shadow: 1px 1px 1px #333333;
+    cursor: default;
+    user-select: none;
+    pointer-events: none;
+    line-height: 35px;
+
+}
+.hr{
+    margin:0;
+    color: #0099CC;
 }
 .button{
   color: #0099CC; 
-  background: transparent; 
+  background: rgb(220,220,220); 
+  border: 2px solid #0099CC;
+  border-radius: 6px;
+  padding-right: 4px; 
+  margin:3px;
+  outline:none;
+  align-items:center;
+  cursor:pointer;
+  width:215px;
+}
+
+.buttonContent{
+  color: #0099CC; 
+  background: rgb(220,220,220); 
   border: 2px solid #0099CC;
   border-radius: 6px;
   padding-top:4px;
   padding-right: 4px; 
+  margin:3px;
 }
 .selectList{
     overflow: hidden;
     -webkit-border-radius: 20px;
     -moz-border-radius: 20px;
     border-radius: 20px;
+    width:100%;
+    padding-top:5px;
     
 }
 .black {

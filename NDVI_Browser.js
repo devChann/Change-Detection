@@ -8,9 +8,8 @@ const APP_DATA_FOLDER_NAME = "NDVI_Browser_App_Data";
 const GEOPROCESSING_MODEL_NAME = "NDVI";
 // Year of the weeks
 // default dates 
-startDate = "2017";
+startDate = "2018";
 
-endDate = '2019-01-29';
 
 
 // List of the places' names
@@ -467,23 +466,6 @@ function getLandsatDatasetInfo(datasetId) {
  * Generates weeks info in the provided year.
  * Returns array of weeks info (start and end time of each week)
  */
-
- function getMonth(endDate,startDate){
-   
-    const monthDifference =  moment(new Date(endDate)).diff(new Date(startDate), 'months', true);
-    var monthsvalues =[]
-    
-    while(endDate > startDate || startDate.format('M') === endDate.format('M')){
-        monthsvalues.push(startDate.format('YYYY-MM'));
-        startDate.add(1,'months');
-    }
-    console.log(monthsvalues);
-    return monthsvalues;
-
-
- }
-
-
 function getWeeksInYear(startDate) {
     var sdateObj = new Date(startDate);
     var smomentObj = moment(sdateObj);
@@ -1069,6 +1051,24 @@ function startApplicationCore() {
         });
 }
 
+function addToShoeBox(itemId) {
+    $GP.m_app.platform.shoebox.getList(function(shoeboxes) {
+        var currentShoebox = shoeboxes[0],
+            currentShoeboxId = currentShoebox.getId()
+        $GP.m_app.platform.shoebox.addEntry({
+            id: itemId,
+            name: "shoebox entry name"
+        }, currentShoeboxId, function(shoebox) {}, function(error) {
+            console.error(error);
+        });
+    }, function(error) {
+        console.error(error);
+    });
+}
+
+function uploadFile(){
+    var browseBefore = document.getElementById("beforeImageInput");
+}
 /***************************
  * Application global variables.
  ***************************
@@ -1105,17 +1105,11 @@ var CurrentMaxDate = null;
     userform.appendChild(beforeImageLable);
     
     var beforeImageInput = document.createElement('input');
-    beforeImageInput.setAttribute("type","text");
-    beforeImageInput.setAttribute("name","dbeforeImageInput");
+    beforeImageInput.setAttribute("type","file");
+    beforeImageInput.setAttribute("accept","image/*");
+    beforeImageInput.id = "beforeImageInput";
+    beforeImageInput.className = "button";
     userform.appendChild(beforeImageInput);
-    
-    var browseBeforeImage = document.createElement('button');
-    browseBeforeImage.setAttribute("type","submit");
-    browseBeforeImage.setAttribute("name","dname");
-    browseBeforeImage.setAttribute("value","Submit");
-    browseBeforeImage.innerHTML = "Browse";
-    browseBeforeImage.className = "button";
-    userform.appendChild(browseBeforeImage);
     
     var lineBreak2 = document.createElement('br');
     userform.appendChild(lineBreak2);
@@ -1125,17 +1119,11 @@ var CurrentMaxDate = null;
     userform.appendChild(afterImageLable);
     
     var afterImageInput = document.createElement('input');
-    afterImageInput.setAttribute("type","text");
-    afterImageInput.setAttribute("name","dbeforeImageInput");
+    afterImageInput.setAttribute("type","file");
+    afterImageInput.className = "custom-file-input";
+    afterImageInput.setAttribute("accept","image/*");
+    afterImageInput.className = "button";
     userform.appendChild(afterImageInput);
-    
-    var browseAfterImage = document.createElement('button');
-    browseAfterImage.setAttribute("type","submit");
-    browseAfterImage.setAttribute("name","dname");
-    browseAfterImage.setAttribute("value","Submit");
-    browseAfterImage.innerHTML = "Browse";
-    browseAfterImage.className = "button";
-    userform.appendChild(browseAfterImage);
     
     
     var lineBreak2 = document.createElement('br');
@@ -1146,20 +1134,11 @@ var CurrentMaxDate = null;
     userform.appendChild(boundary);
     
     var boundaryInput = document.createElement('input');
-    boundaryInput.setAttribute("type","text");
-    boundaryInput.setAttribute("name","dname");
-
+    boundaryInput.setAttribute("type","file");
+    boundaryInput.setAttribute("accept",".SHP*");
+    boundaryInput.className = "button";
     userform.appendChild(boundaryInput);
     
-    var browseBoundaryInput = document.createElement('button');
-    browseBoundaryInput.setAttribute("type","submit");
-    browseBoundaryInput.setAttribute("name","dname");
-    browseBoundaryInput.setAttribute("value","Submit");
-    browseBoundaryInput.innerHTML = "Browse"
-    browseBoundaryInput.className = "button"
-    userform.appendChild(browseBoundaryInput);
-    
-    var lineBreak2 = document.createElement('br');
     userform.appendChild(lineBreak2);
     
     // create the drop down list
@@ -1199,24 +1178,12 @@ var CurrentMaxDate = null;
     
     console.log("form rendered");
     }
- function getDates(Weeks){
-     var start = document.getElementById("startDateId").value;
-     var end = document.getElementById("endDateId").value;
-     console.log("start date:" + start );
-     console.log("End date:" + end );
-     
-     startDate = start;
-     endDate = end;
-     Weeks =  getWeeksInYear(start,end);
-     return Weeks;
- }
-
-
 
 {
     removeElement(document.getElementById("livesearch"));
     removeElement(document.getElementsByClassName("mapc")[0].parentNode);
-
+   
+    
     var appNav = document.createElement("div");
     appNav.className = "appNav";
     appNav.id = "appNav"
@@ -1233,7 +1200,7 @@ var CurrentMaxDate = null;
     localContent.setAttribute("name","dname");
     localContent.setAttribute("value","Submit");
     localContent.innerHTML = "Browse Content";
-    localContent.className = "button";
+    localContent.className = "buttonContent";
     localContent.id = "localContentId"
     localContent.addEventListener("click", renderUserForm, false);
     appTitle.appendChild(localContent);
@@ -1244,7 +1211,7 @@ var CurrentMaxDate = null;
     getContent.setAttribute("value","Submit");
     getContent.innerHTML = "Get Content";
     //getContent.addEventListener("click",x,false)
-    getContent.className = "button";
+    getContent.className = "buttonContent";
     
     appTitle.appendChild(getContent);
 
@@ -1334,8 +1301,8 @@ var CurrentMaxDate = null;
         inputStartdate.className = "input";
         inputStartdate.setAttribute("id","startDateId")
         inputStartdate.setAttribute("type", "Year");
-        inputStartdate.setAttribute("value","2017");
-        inputStartdate.dataset.value = "2017";
+        inputStartdate.setAttribute("value","2018");
+        inputStartdate.dataset.value = "2018";
         inputStartdate.addEventListener("input", function(event) {
             event.target.dataset.value = event.target.value;
 
@@ -1343,23 +1310,6 @@ var CurrentMaxDate = null;
             
         });
         nav.appendChild(inputStartdate);
-        
-        
-        
-        var endDateLabel= document.createElement('label')
-        endDateLabel.innerHTML = "End Date";
-        nav.appendChild(endDateLabel);
-        
-        
-        var inputEndtdate = document.createElement("input");
-        inputEndtdate.className = "input";
-        inputEndtdate.setAttribute("type", "date");
-        inputEndtdate.setAttribute("id","endDateId")
-        inputEndtdate.setAttribute("value", "2019-01-01");
-        inputEndtdate.dataset.value = "2019-01-01";
-       
-        nav.appendChild(inputEndtdate);
-
 
         var preparingNode = document.createElement("div");
         preparingNode.className = "preparing";

@@ -820,7 +820,7 @@ function startProcessing(folderId, datasetId) {
                     return _.endsWith(o.name, "_B" + i)
                 }).id;
             }
-
+            console.log("bands:" + bands);
             return bands;
         });
 

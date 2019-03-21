@@ -442,37 +442,32 @@ function renderCharts(geojson){
     createArrayFromGeoJson(geojson,function(array){
         console.log(array);
         var dataCrossfilter = crossfilter(array);
-        console.log("dataCrossfilter" + dataCrossfilter);
-        console.log(dataCrossfilter)
-        var Changevalue = dataCrossfilter.dimension(function(d){return d.Value;});
-        console.log(Changevalue);
+        
         var area = dataCrossfilter.dimension(function(d){ return d.M_AREA;});
-        console.log(area);
-        var sumArea = Changevalue.group().reduceSum(function(d){return +d.Return;});
-        console.log(sumArea);
+        var groupArea = area.group();
         
         var typeOfChange = dataCrossfilter.dimension(function(d){
             if(d.Value == 1){return "Negative"}else{
                 return "Positive";
             }
         });
+        
+        var groupname = "Choropleth";
+        
+        
         var totalChangeArea = typeOfChange.group().reduceSum(function(d){
             return +d.M_AREA;
-        })
-        console.log(typeOfChange);
-        var forestChange = typeOfChange.group().reduceCount();
+        });
         
-        
-        var grp = typeOfChange.group();
-        console.log(grp.all());
         var returnRowChart = dc.rowChart("#rowChart");
+        
         returnRowChart
             .dimension(typeOfChange)
             .group(totalChangeArea)
             .controlsUseVisibility(true)
             .elasticX(true)
         returnRowChart.xAxis().ticks(5).tickFormat(function(d){return d;});
-        returnRowChart.ordinalColors(["#d81111","#125907",]);
+        returnRowChart.ordinalColors(["#d81111","#125907"]);
         
         
         var returnPiechart = dc.pieChart("#piechart");
@@ -486,21 +481,20 @@ function renderCharts(geojson){
                     // return d.data.key + '-' + dc.utils.printSingleValue((d.endAngle - d.startAngle) / (2*Math.PI) * 100) + '%';
                 //})
             //})
-            
-        returnPiechart.ordinalColors(["#125907","#d81111"]);
-        
-        var  mapChart=dc.geoChoroplethChart("#choromap")
-        mapChart
-            .dimension(area)
-            .group(grp.all())
-            .colors(d3.scale.linear().domain([0,330000]).range(["#125907","#d81111"]))
-            .overlayGeoJson(geojson.features, "forest", function(d) {
-             return d.properties.M_AREA;
-            });
+        returnPiechart.ordinalColors(["#d81111","#125907"]);
+        var map = document.getElementById("map");
+        console.log(map);
+        var choroChart = dc.geoChoroplethChart(map)
+          .dimension(area)
+          .group(totalChangeArea)
+          .colors(["#125907","#d81111"])
+          .colorDomain([-5, 200])   
+          .colorAccessor(function(d, i){return d.M_Area;})
+          .overlayGeoJson(geojson.features, 'M_AREA', function(d) {
+            return d.properties.M_AREA;
+          })
         dc.renderAll();
         
     });
     
 }
-    
-
